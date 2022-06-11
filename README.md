@@ -11,3 +11,12 @@
 - [Github Katya Herrera](https://github.com/katyaH31) te llevará al perfil
 ## Enlace a repositorio original
 https://github.com/MonicaCabanas23/Raices-de-funciones-no-lineales.git
+# NOTA❗
+- Posiblemente al correr el método de Halley le de un error en la celda __In [4]: pip install tabulate__
+- Se arregla instalando el __pip install tabulate__ en la terminal de __cdm__ ya que es una libreria desde el jupyter notebook local y luego correrlo normal en el jupyter notebook
+~~~
+## PASOS: 
+- windows + R 
+- Ejecutar cdm y instalar __pip install tabulate__
+~~~
+- ![pip install tabulate1](https://user-images.githubusercontent.com/71042746/173207126-056631fe-bdc4-41ad-b637-0bd94b2dd30a.png)
