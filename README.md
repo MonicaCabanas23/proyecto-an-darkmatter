@@ -9,3 +9,5 @@
 - [Github Monica Cabañas](https://github.com/MonicaCabanas23) te llevará al perfil
 2. Katya Lisbeth Herrera Molina - **Carnet: 00188119**
 - [Github Katya Herrera](https://github.com/katyaH31) te llevará al perfil
+## Enlace a repositorio original
+https://github.com/MonicaCabanas23/Raices-de-funciones-no-lineales.git
