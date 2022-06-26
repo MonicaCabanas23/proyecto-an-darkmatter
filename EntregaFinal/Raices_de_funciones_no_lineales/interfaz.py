@@ -4,6 +4,7 @@ from tkinter import messagebox
 from tkinter.font import BOLD
 from turtle import bgcolor
 from xml.etree.ElementTree import tostring
+from matplotlib.pyplot import text
 from numpy import size
 from sympy import root, sympify
 
@@ -113,26 +114,44 @@ def v4():
     lblIndication.place(x = 220, y = 50)
     lblFunction2 = Label(halleyWindow, text = "F(x): ", font = ("Century Gothic", 12), foreground="white", background="black")
     lblFunction2.pack()
-    lblFunction2.place(x = 250, y = 100)
-    lblderivada1 = Label(halleyWindow, text = "F'(x): ", font = ("Century Gothic", 12), foreground="white", background="black")
-    lblderivada1.place(x = 250, y = 150)
-    lblderivada2 = Label(halleyWindow, text = "F''(x): ", font = ("Century Gothic", 12), foreground="white", background="black")
-    lblderivada2.place(x = 250, y = 200)
+    lblFunction2.place(x = 110, y = 150)
     lblTol2 = Label(halleyWindow, text = "TOL: ", font = ("Century Gothic", 12), foreground="white", background="black")
-    lblTol2.place(x = 250, y = 250)
+    lblTol2.place(x = 110, y = 200)
+    lblIter2 = Label(halleyWindow, text = "Iter: ", font = ("Century Gothic", 12), foreground="white", background="black")
+    lblIter2.place(x = 110, y = 250)
+    lblInicial2 = Label(halleyWindow, text = "P0: ", font = ("Century Gothic", 12), foreground="white", background="black")
+    lblInicial2.place(x = 110, y = 300)
+    lblFilename = Label(halleyWindow, text = "File name: ", font = ("Century Gothic", 12), foreground="white", background="black")
+    lblFilename.place(x = 110, y = 350)
 
     # Text box
-    txtFunction2 = Entry(halleyWindow, font = ("Century Gothic", 12))
-    txtFunction2.place(x = 300, y = 100)
-    txtderivada1 = Entry(halleyWindow, font = ("Century Gothic", 12))
-    txtderivada1.place(x = 300, y = 150)
-    txtderivada2 = Entry(halleyWindow, font = ("Century Gothic", 12))
-    txtderivada2.place(x = 300, y = 200)
-    txtTol2 = Entry(halleyWindow, font = ("Century Gothic", 12))
-    txtTol2.place(x = 300, y = 250)
+    g_function = StringVar() #funcion donde se guardar el texto
+    txtFunction2 = Entry(halleyWindow, textvariable=g_function, font = ("Century Gothic", 12))
+    txtFunction2.place(x = 200, y = 150)
+    txtFunction2.focus()
 
-    # Button
-    btnCalculate2 = Button(halleyWindow, text = "Calcular", width=17, height=3, font = ("Century Gothic", 9))
-    btnCalculate2.place(x = 300, y = 300)
+    tol2_function = StringVar()
+    txtTol2 = Entry(halleyWindow, textvariable=tol2_function, font = ("Century Gothic", 12))
+    txtTol2.place(x = 200, y = 200)
+
+    iter2_function = StringVar()
+    txtIter2 = Entry(halleyWindow, textvariable=iter2_function, font = ("Century Gothic", 12))
+    txtIter2.place(x = 200, y = 250)
+
+    inicial2_function = StringVar()
+    txtInicial2 = Entry(halleyWindow, textvariable=inicial2_function , font = ("Century Gothic", 12))
+    txtInicial2.place(x = 200, y = 300)
+
+    filename_function = StringVar()
+    txtFilename = Entry(halleyWindow, textvariable=filename_function , font = ("Century Gothic", 12))
+    txtFilename.place(x = 200, y = 350)
+
+    btnCalculate2 = Button(halleyWindow, text = "Calcular", width=15, height=2, font = ("Century Gothic", 10))
+    btnCalculate2.place(x = 550, y = 300)
+    #btnCalculate2.configure(command=clickbutton_clicked)
+    
+    #-----------------------------------------Resultado label halley--------------------------------------->
+    result_label = Label(halleyWindow, text="holiwis")
+    result_label.place(x = 400, y = 450)
 
 root.mainloop()
