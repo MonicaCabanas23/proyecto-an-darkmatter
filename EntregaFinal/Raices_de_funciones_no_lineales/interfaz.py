@@ -11,6 +11,8 @@ from sympy import root, sympify
 
 # Importar métodos numéricos desarrollados
 from ridder import *
+from halley import *
+
 
 #----------------------------Ventana 1 ------------------------------------------------------------
 root = Tk()
