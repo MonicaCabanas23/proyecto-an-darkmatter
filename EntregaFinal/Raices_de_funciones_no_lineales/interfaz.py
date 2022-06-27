@@ -85,13 +85,18 @@ def v3():
     def btnCalculate_clicked():
         # Get values and convert them to expressions
         strF = txtFunction.get()
-        f = lambda x: sympify(strF)
+        f_sym = sympify(strF)
         a = float(txtA.get())
         b = float(txtB.get())
+        c = (a+b)*0.5
         tol = sympify(txtTol.get())
-        p = ridder(f, a, b, tol)
-        print(p)
-        # pdfGenerate()
+
+        # Get other values for generating pdf
+        p, n, table = ridder(f_sym, a, b, tol)
+        df = pd.DataFrame(table)
+        g = g_function(f_sym, a, b, c)
+        graph(f_sym, a, b, c, p, g, "Ridder")
+        pdfGenerate(f_sym, a, b, c, tol, "prueba", df, n, p) 
         
     btnCalculate = Button(ridderWindow, text = "Calcular", width=17, height=3, font = ("Century Gothic", 9), command = btnCalculate_clicked, foreground="black", background="#ffde59")
     btnCalculate.place(x = 325, y = 350)
