@@ -61,3 +61,107 @@ def halley(f, df, d2f, p0, iter, tol):   #definiendo la función halley
             break                                 
     print(tabulate(lista,headers=["n","pn","f(pn)","f'(pn)","error"],tablefmt='fancy_grid')) #imprimiendo resultados en tabulaciones
     return p
+
+#----------------------Grafica----------------------------------------->
+#from pylab import *  da problemas con el boton de ventana 1
+
+# importar el módulo pyplot
+
+import matplotlib.pyplot as plt
+
+from math import *
+from numpy import *
+
+def graf(file_name):
+    x = arange(0.1, 20, 0.1)
+    y1 = 1/2-cos(x)
+    p1 = plot(x, y1)
+    
+    # Texto en la gráfica en coordenadas (x,y)
+    texto1 = text(8, -0.25, r'$\frac{1}{2}-cos(x)$', fontsize=12)
+    # Añado una malla al gráfico
+    grid()
+    
+    title('Representacion de funciones')
+    xlabel('x')
+    ylabel('y')
+    show()
+    plt.savefig(f"{file_name}_graph.png", bbox_inches="tight" )
+
+#------------------------------------------documento-------------------------------------------------->
+def write_math(doc, text):
+    with doc.create(Alignat(numbering=False, escape=False)) as agn:
+        agn.append(text)
+
+def write(doc, text):
+    doc.append(text)
+
+def write_pdf(f, f_sym, df, df_sym, d2f, d2f_sym, p0, iter, tol, file_name):
+    geometry_options = {"tmargin": "1.5in", "lmargin": "1.5in"}
+    doc = Document(geometry_options=geometry_options)
+    imagen_file = f"{file_name}__graph.png"
+
+    if abs(df(p0)) < 1 and abs(df(iter)) < 1:
+          return False, 0
+    
+    k = max(abs(p0), abs(iter))
+
+    max_dist = max(abs(p0 -p0), abs(iter - p0))
+    n_est = ceil(log(tol/max_dist)/log(k))
+    
+    return True, n_est
+    
+    with doc.create(Section("Halley")):
+        with doc.create(Subsection("Datos")):
+            write_math(doc, f"f(x) = {sp.latex(f_sym)}")
+            write_math(doc, f"f'(x) = {sp.latex(df_sym)}")
+            write_math(doc, f"f''(x) = {sp.latex(d2f_sym)}")
+            write_math(doc, f"p0 = {p0}")
+            write_math(doc, f"iter = {iter}")
+            write_math(doc, f"\elipson  = {sp.latex(tol)}")
+            
+            with doc.create(Subsection("Validaciones")):
+                write(doc, f"Evaluando en funcion f(x) los intervalos [{p0}, {iter}]: ")
+                write_math(doc, f"\nf(p0) = {f(p0)}")
+                write_math(doc,f"f(iter) = {f(iter)}")
+                
+                write(doc, "verificando derivada\n")
+                write_math(doc, f"df(p0) = {df(p0)}")
+                write_math(doc, f"df(iter) = {df(iter)}")
+                
+                if abs(df(p0)) < 1 and abs(df(iter)) < 1:
+                    write(doc, "si cumple que tiene derivada ")
+                else:
+                    write(doc, "no cumple que tiene derivada")
+                    
+                    k = max(abs(p0), abs(iter))
+                    write(doc, f"La cota para K en el intervalo [{p0}, {iter}] es: {k}")
+                    max_dist = max(abs(p0 -p0), abs(iter - p0))
+                    n_est = ceil(log(tol/max_dist)/log(k))
+                    write(doc, f"Número de iteraciones estimadas: {abs(n_est)}")
+                    write(doc, "Rapidez de convergencia:")
+                    write_math(doc, f"O({round(k,2)}^n)")
+                    
+                    with doc.create(Subsection("Grafica")):
+                        write_math(doc, graf(file_name))
+                        
+                        with doc.create(Subsection("Tabulaciones")):
+                            write_math(doc, halley(f, df, d2f, p0, iter, tol))
+                            
+                            doc.generate_pdf(file_name, clean_tex=False)
+
+#------------------------------------funcion al apretar el botón--------------------------------------->
+def solve( p0, iter, f_str, tol, file_name):
+        global x
+        x = sp.Symbol("x")
+
+        f_sym = sp.sympify(f_str)  #funcion simbolica
+        f = sp.lambdify(x, f_sym)  #funcion f(x)
+        df_sym = sp.diff(f_sym)   #derivada 1
+        df = sp.lambdify(x, df_sym)   #funcion derivada 1
+        d2f_sym = sp.diff(df_sym)  #derivada 2
+        d2f = sp.lambdify(x, d2f_sym) #funcion derivada 2   
+
+#---------------------------------------configurando webbrowser---------------------------------------->
+        webbrowser.open(f"{file_name}.pdf")
+
