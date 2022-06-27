@@ -72,22 +72,6 @@ import matplotlib.pyplot as plt
 from math import *
 from numpy import *
 
-def graf(file_name):
-    x = arange(0.1, 20, 0.1)
-    y1 = 1/2-cos(x)
-    p1 = plot(x, y1)
-    
-    # Texto en la gráfica en coordenadas (x,y)
-    texto1 = text(8, -0.25, r'$\frac{1}{2}-cos(x)$', fontsize=12)
-    # Añado una malla al gráfico
-    grid()
-    
-    title('Representacion de funciones')
-    xlabel('x')
-    ylabel('y')
-    show()
-    plt.savefig(f"{file_name}_graph.png", bbox_inches="tight" )
-
 #------------------------------------------documento-------------------------------------------------->
 def write_math(doc, text):
     with doc.create(Alignat(numbering=False, escape=False)) as agn:
@@ -99,17 +83,6 @@ def write(doc, text):
 def write_pdf(f, f_sym, df, df_sym, d2f, d2f_sym, p0, iter, tol, file_name):
     geometry_options = {"tmargin": "1.5in", "lmargin": "1.5in"}
     doc = Document(geometry_options=geometry_options)
-    imagen_file = f"{file_name}__graph.png"
-
-    if abs(df(p0)) < 1 and abs(df(iter)) < 1:
-          return False, 0
-    
-    k = max(abs(p0), abs(iter))
-
-    max_dist = max(abs(p0 -p0), abs(iter - p0))
-    n_est = ceil(log(tol/max_dist)/log(k))
-    
-    return True, n_est
     
     with doc.create(Section("Halley")):
         with doc.create(Subsection("Datos")):
@@ -141,15 +114,21 @@ def write_pdf(f, f_sym, df, df_sym, d2f, d2f_sym, p0, iter, tol, file_name):
                     write(doc, f"Número de iteraciones estimadas: {abs(n_est)}")
                     write(doc, "Rapidez de convergencia:")
                     write_math(doc, f"O({round(k,2)}^n)")
-                    
-                    with doc.create(Subsection("Grafica")):
-                        write_math(doc, graf(file_name))
                         
-                        with doc.create(Subsection("Tabulaciones")):
-                            write_math(doc, halley(f, df, d2f, p0, iter, tol))
-                            
-                            create_doc(doc, file_name)
-                            open_doc(file_name)
+                    with doc.create(Subsection("Tabulaciones")):
+                        write_math(doc, halley(f, df, d2f, p0, iter, tol))
+                        
+    create_doc(doc, file_name)
+    open_doc(file_name)
+
+    if abs(df(p0)) < 1 and abs(df(iter)) < 1:
+          return False, 0
+    
+    k = max(abs(p0), abs(iter))
+
+    max_dist = max(abs(p0 -p0), abs(iter - p0))
+    n_est = ceil(log(tol/max_dist)/log(k))
+
 
 #------------------------------------funcion al apretar el botón--------------------------------------->
 def solve( p0, iter, f_str, tol, file_name):
