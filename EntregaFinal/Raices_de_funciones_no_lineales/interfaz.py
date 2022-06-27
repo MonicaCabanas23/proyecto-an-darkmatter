@@ -86,26 +86,21 @@ def v3():
 
     # Button
     def btnCalculate_clicked():
-        try:
-            # Get values and convert them to expressions
-            strF = txtFunction.get()
-            f_sym = sympify(strF)
-            a = float(txtA.get())
-            b = float(txtB.get())
-            c = (a+b)*0.5
-            tol = sympify(txtTol.get())
+        # Get values and convert them to expressions
+        strF = txtFunction.get()
+        f_sym = sympify(strF)
+        a = float(txtA.get())
+        b = float(txtB.get())
+        c = (a+b)*0.5
+        tol = sympify(txtTol.get())
 
-            # Get other values for generating pdf
-            try:
-                p, n, table = ridder(f_sym, a, b, tol)
-                df = pd.DataFrame(table)
-                k = asymptotic_error(table)
-                pdfGenerate (f_sym, a, b, c, tol, "Método de Ridder", k, df, n, p)
-            except ValueError as error : 
-                messagebox.showerror(title='Error', message=str(error))
-        except ValueError as error : 
-                messagebox.showerror(title='Error', message=str(error))
-                
+        # Get other values for generating pdf
+        p, n, table = ridder(f_sym, a, b, tol)
+        df = pd.DataFrame(table)
+        g = g_function(f_sym, a, b, c)
+        graph(f_sym, a, b, c, p, g, "Ridder")
+        pdfGenerate(f_sym, a, b, c, tol, "prueba", df, n, p) 
+        
     btnCalculate = Button(ridderWindow, text = "Calcular", width=17, height=3, font = ("Century Gothic", 9), command = btnCalculate_clicked, foreground="black", background="#ffde59")
     btnCalculate.place(x = 325, y = 350)
 
@@ -158,12 +153,31 @@ def v4():
     txtFilename = Entry(halleyWindow, textvariable=filename_function , font = ("Century Gothic", 12))
     txtFilename.place(x = 200, y = 350)
 
+    #-------------------------------------Button halley----------------------------------------------------->
+    def clickbutton_clicked():
+        try:
+            p0 = float(inicial2_function.get())
+            iter = float(iter2_function.get())
+            tol = eval(tol2_function.get())
+            f_str = g_function.get()
+            file_name = filename_function.get()
+
+            try:
+                solve(p0, iter, f_str, tol, file_name)
+                result_label.config(text="Reporte Generado", foreground="white",background="black", font = ("Century Gothic", 15))
+            except ValueError as error:
+                showerror(title="Error", message=str(error))
+            
+        except ValueError as error:
+            showerror(title="Error", message=str(error))
+
+
     btnCalculate2 = Button(halleyWindow, text = "Calcular", width=15, height=2, font = ("Century Gothic", 10))
     btnCalculate2.place(x = 550, y = 300)
-    #btnCalculate2.configure(command=clickbutton_clicked)
+    btnCalculate2.configure(command=clickbutton_clicked)
     
     #-----------------------------------------Resultado label halley--------------------------------------->
-    result_label = Label(halleyWindow, text="holiwis")
+    result_label = Label(halleyWindow)
     result_label.place(x = 400, y = 450)
 
 root.mainloop()
