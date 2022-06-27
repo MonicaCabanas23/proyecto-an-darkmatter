@@ -148,7 +148,8 @@ def write_pdf(f, f_sym, df, df_sym, d2f, d2f_sym, p0, iter, tol, file_name):
                         with doc.create(Subsection("Tabulaciones")):
                             write_math(doc, halley(f, df, d2f, p0, iter, tol))
                             
-                            doc.generate_pdf(file_name, clean_tex=False)
+                            create_doc(doc, file_name)
+                            open_doc(file_name)
 
 #------------------------------------funcion al apretar el botón--------------------------------------->
 def solve( p0, iter, f_str, tol, file_name):
@@ -161,7 +162,15 @@ def solve( p0, iter, f_str, tol, file_name):
         df = sp.lambdify(x, df_sym)   #funcion derivada 1
         d2f_sym = sp.diff(df_sym)  #derivada 2
         d2f = sp.lambdify(x, d2f_sym) #funcion derivada 2   
+        write_pdf(f, f_sym, df, df_sym, d2f, d2f_sym, p0, iter, tol, file_name)
 
 #---------------------------------------configurando webbrowser---------------------------------------->
-        webbrowser.open(f"{file_name}.pdf")
+
+def create_doc(doc, file_name):
+    doc.generate_pdf(file_name, clean_tex=False)
+    doc.generate_tex()
+
+def open_doc(file_name):
+    doc_path = f"{file_name}.pdf"
+    webbrowser.open("file://" + os.path.realpath(doc_path)) 
 
