@@ -10,11 +10,13 @@ from numpy import *
 from math import exp, sqrt, sin, cos, pi
 from sympy import *
 from tabulate import tabulate
-from pylatex import Document, Section, Subsection, Tabular, Math, TikZ, Plot, Figure, Alignat
+from pylatex import Document, Section, Subsection,Subsubsection, Tabular, Math, TikZ, Plot, Figure, Alignat,Command
 from pylatex.utils import italic
 import webbrowser
+from pylatex.utils import NoEscape
 
 listahalley=[]
+lista=[]
 
 #----------------------------------Manejo de archivo-------------------------------------------------->
 def remove_file(file_name):
@@ -83,8 +85,11 @@ def write(doc, text):
 def write_pdf(f, f_sym, df, df_sym, d2f, d2f_sym, p0, iter, tol, file_name):
     geometry_options = {"tmargin": "1.5in", "lmargin": "1.5in"}
     doc = Document(geometry_options=geometry_options)
+
+    doc.preamble.append(Command("title", "Método de Halley"))
+    doc.append(NoEscape(r'\maketitle'))
     
-    with doc.create(Section("Halley")):
+    with doc.create(Section("Desarrollo del problema")):
         with doc.create(Subsection("Datos")):
             write_math(doc, f"f(x) = {sp.latex(f_sym)}")
             write_math(doc, f"f'(x) = {sp.latex(df_sym)}")
@@ -93,30 +98,47 @@ def write_pdf(f, f_sym, df, df_sym, d2f, d2f_sym, p0, iter, tol, file_name):
             write_math(doc, f"iter = {iter}")
             write_math(doc, f"\elipson  = {sp.latex(tol)}")
             
+            
             with doc.create(Subsection("Validaciones")):
-                write(doc, f"Evaluando en funcion f(x) los intervalos [{p0}, {iter}]: ")
-                write_math(doc, f"\nf(p0) = {f(p0)}")
-                write_math(doc,f"f(iter) = {f(iter)}")
-                
+              with doc.create(Subsubsection("Evaluando la función en los intervalos")):
+                 write(doc, f"Evaluando en funcion f(x) los intervalos [{p0}, {iter}]: \n")
+                 write(doc, "\nEvaluando el punto inicial en la función\n")
+                 write_math(doc, f"f(p0) = {f(p0)}")
+                 write(doc, "\nEvaluando la iteración o punto final en función\n")
+                 write_math(doc,f"f(iter) = {f(iter)}")
+
+            with doc.create(Subsubsection("Evaluando si existe la derivada")): 
                 write(doc, "verificando derivada\n")
+                write(doc, "\nEvaluando la punto inicial en primera derivada\n")
                 write_math(doc, f"df(p0) = {df(p0)}")
+                write(doc, "\nEvaluando la iteración en primera derivada\n")
                 write_math(doc, f"df(iter) = {df(iter)}")
                 
                 if abs(df(p0)) < 1 and abs(df(iter)) < 1:
-                    write(doc, "si cumple que tiene derivada ")
+                    write(doc, "si cumple que tiene derivada, prosigamos al desarrollo del problema...")
                 else:
                     write(doc, "no cumple que tiene derivada")
-                    
-                    k = max(abs(p0), abs(iter))
-                    write(doc, f"La cota para K en el intervalo [{p0}, {iter}] es: {k}")
-                    max_dist = max(abs(p0 -p0), abs(iter - p0))
-                    n_est = ceil(log(tol/max_dist)/log(k))
-                    write(doc, f"Número de iteraciones estimadas: {abs(n_est)}")
-                    write(doc, "Rapidez de convergencia:")
-                    write_math(doc, f"O({round(k,2)}^n)")
+
+
+            with doc.create(Subsubsection("verificanfo la cota k en el intervalo")):
+                
+                k = max(abs(p0), abs(iter))
+                write(doc, f"\nLa cota para K en el intervalo [{p0}, {iter}] es: {k}\n")
+                max_dist = max(abs(p0 -p0), abs(iter - p0))
+                n_est = ceil(log(tol/max_dist)/log(k))
+
+            with doc.create(Subsubsection("Evaluando iteraciones estimadas")):
+                write(doc, f"\nNúmero de iteraciones estimadas: {abs(n_est)}\n")
+            
+            with doc.create(Subsubsection("Evaluando Rapides de Convergencia")):
+                write(doc, "\nRapidez de convergencia:")
+                write_math(doc, f"O({round(k,2)}^n)")
+
+            with doc.create(Subsubsection("Resultado de raíz aproximada del problema")):
                         
-                    with doc.create(Subsection("Tabulaciones")):
-                        write_math(doc, halley(f, df, d2f, p0, iter, tol))
+                write(doc, "Valor de raíz aproximada:")
+                write_math(doc, sp.latex(halley(f, df, d2f, p0, iter, tol)))
+                
                         
     create_doc(doc, file_name)
     open_doc(file_name)
@@ -134,6 +156,7 @@ def write_pdf(f, f_sym, df, df_sym, d2f, d2f_sym, p0, iter, tol, file_name):
 def solve( p0, iter, f_str, tol, file_name):
         global x
         x = sp.Symbol("x")
+
 
         f_sym = sp.sympify(f_str)  #funcion simbolica
         f = sp.lambdify(x, f_sym)  #funcion f(x)

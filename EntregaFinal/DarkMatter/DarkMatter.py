@@ -167,7 +167,7 @@ if __name__ == '__main__':
                 file_name = filename_function.get()
 
                 try:
-                    solve(p0, iter, f_str, tol, file_name)
+                    solve(p0, iter, f_str, tol,file_name)
                     result_label.config(text="Reporte Generado", foreground="white",background="black", font = ("Century Gothic", 15))
                 except ValueError as error:
                     messagebox.showerror(title="Error", message=str(error))
