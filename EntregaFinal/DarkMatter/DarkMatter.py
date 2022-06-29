@@ -71,6 +71,8 @@ if __name__ == '__main__':
         lblB.place(x = 250, y = 250)
         lblTol = Label(ridderWindow, text = "TOL: ", font = ("Century Gothic", 12), foreground="white", background="black")
         lblTol.place(x = 250, y = 300)
+        lblFile_name = Label(ridderWindow, text = "Nombre: ", font = ("Century Gothic", 12), foreground="white", background="black")
+        lblFile_name.place(x = 250, y = 350)
 
         # Text box
         txtFunction = Entry(ridderWindow, font = ("Century Gothic", 12))
@@ -81,6 +83,8 @@ if __name__ == '__main__':
         txtB.place(x = 300, y = 250)
         txtTol = Entry(ridderWindow, font = ("Century Gothic", 12))
         txtTol.place(x = 300, y = 300)
+        txtFile_name = Entry(ridderWindow, font = ("Century Gothic", 12))
+        txtFile_name.place(x = 300, y = 350)
 
         # Button
         def btnCalculate_clicked():
@@ -93,20 +97,30 @@ if __name__ == '__main__':
                 b = float(txtB.get())
                 c = (a+b)*0.5
                 tol = sympify(txtTol.get())
+                file_name = txtFile_name.get()
 
                 # Get other values for generating pdf
                 try:
-                    p, n, table = ridder(f_sym, a, b, tol)
+                    # solve and get values
+                    d, n, table = ridder(f_sym, a, b, tol)
                     df = pd.DataFrame(table)
                     k = asymptotic_error(table)
-                    pdfGenerate (f_sym, a, b, c, tol, "Método de Ridder", k, df, n, p)
+                    g_sym = get_g_function(f_sym, a, b, c)
+                    # Graphics
+                    graph(f_sym, a, b, c, d, g_sym, file_name)
+                    graph_error(table, k, file_name)
+                    # Create pdf
+                    pdfGenerate (f_sym, a, b, c, tol, file_name, k, df, n, d)
+                    if pdf_created:
+                        lblConfirmation = Label(ridderWindow, text = "Reporte generado ", font = ("Century Gothic", 12), foreground="white", background="black")
+                        lblConfirmation.place(x = 250, y = 450)
                 except ValueError as error : 
                     messagebox.showerror(title='Error', message=str(error))
             except ValueError as error : 
                     messagebox.showerror(title='Error', message=str(error))
             
         btnCalculate = Button(ridderWindow, text = "Calcular", width=17, height=3, font = ("Century Gothic", 9), command = btnCalculate_clicked, foreground="black", background="#ffde59")
-        btnCalculate.place(x = 325, y = 350)
+        btnCalculate.place(x = 325, y = 400)
 
         #---------------------------------Funcion Ventana Halley----------------------------------------
     def v4():

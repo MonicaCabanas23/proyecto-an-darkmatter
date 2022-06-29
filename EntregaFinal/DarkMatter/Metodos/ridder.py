@@ -1,17 +1,21 @@
+from lib2to3.pygram import Symbols
 import math
 from pickle import NONE
 from turtle import width
+from matplotlib.font_manager import get_fontext_synonyms
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import sympy as sp
-from sympy import lambdify, sin, cos, sympify, tan, asin, acos, Symbol 
+from sympy import false, lambdify, sympify, Symbol, true 
 from pylatex import Document, Section, Subsection, Command, Alignat, Tabular, Figure
 from pylatex.utils import NoEscape
 import webbrowser
 import os
 
-#----------------------------------------------------------- Method algorithms
+global pdf_created
+pdf_created = false
+#----------------------------------------------------------- Functions of Ridder Method
 def ridder (f_sym, a, b, TOL):
     # Declaring variables to use
     x = Symbol('x')
@@ -79,6 +83,22 @@ def ridder (f_sym, a, b, TOL):
 
     return d, n, table
 
+def exponentialFactor (f, a, b, c):
+    k = (f(c) + np.sign(f(b))*math.sqrt(f(c)**2 - f(a)*f(b)))/f(b)
+    return k
+
+def get_g_function(f_sym, a, b, c):
+    x = Symbol('x')
+    f = lambdify(x, f_sym)
+    
+    k = exponentialFactor(f, a, b, c)
+    m = (f(b)*k**2 - f(a))/(b-a)
+    p = f(c)*k
+    # Using linear interpolation between a and b
+    strg = str(m * (x - c) + p)  
+    g_sym = sympify(strg)
+    return g_sym
+
 def asymptotic_error (table):
     length = len(table["ERROR"])
     sum = 0
@@ -88,7 +108,52 @@ def asymptotic_error (table):
     avg = sum / (length - 1) # Calculating average for the asymptotic error constant
     return avg
 
-#-------------------------------------------------Function for writing math expressions
+#----------------------------------------------------------------------- Function for graphing
+def graph (f_sym, a, b, c, d, g_sym, file_name):
+    x = Symbol('x')
+    f = lambdify(x, f_sym)
+    g = lambdify(x, g_sym)
+    x = np.linspace(a, b, 100)
+    d = c-(c-a)*f(c)/math.sqrt(f(c)**2-f(a)*f(b)) # first iteration
+
+    plt.plot(x, [f(i) for i in x], label = 'f(x)', color = 'y')
+    plt.plot([a, b, c, d],[f(a), f(b), f(c), f(d)], 'o', color = 'y')
+    plt.plot(x, [g(i) for i in x], label = 'g(x)', color = 'b')
+    plt.plot([a, b, c, d], [g(a), g(b), g(c), g(d)], 'o', color = 'b')
+    plt.legend(loc = 'upper left')
+    plt.xticks([a, b, c, d], ['a', 'b', 'c', 'd'])
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.grid()
+    plt.savefig(f"{file_name}_graph.png", bbox_inches = "tight")
+
+#---------------------------------------------------------------------- Graphing error
+def graph_error(table, l, file_name):
+    # Taking ridder as a quadratic order of convergence algorithm
+    e = lambda n: l**(2**n-1)*(table["ERROR"][0])**2**n
+
+    # Taking ridder as a sqrt(2) order of convergence algorithm
+    def error (n):
+        if n % 2 == 0:
+            return l**((2**(n/2)-1)*(math.sqrt(2)+1))*(table["ERROR"][0])**(2**(n/4))
+        else:
+            return l**(2**((n+3)/2)-math.sqrt(2)-1)*(table["ERROR"][0])**(2**((n+3)/4))
+    
+    plt.plot(table["n"], [e(i) for i in table["n"]], label="Estimación con orden de convergencia cuadrática", color="green")
+    plt.plot(table["n"], [e(i) for i in table["n"]], 'o', color="green")
+    plt.plot(table["n"], [error(i) for i in table["n"]], label="Estimación con orden de convergencia sqrt(2)", color="red")
+    plt.plot(table["n"], [error(i) for i in table["n"]], 'o', color="red")
+    plt.plot(table["n"], table["ERROR"], label="Error real", color="blue")
+    plt.plot(table["n"], table["ERROR"], 'o', color="blue")
+    plt.legend(loc = "lower left")
+    plt.grid()
+    plt.title("Rapidez de convergencia")
+    plt.xlabel("Iteraciones")
+    plt.ylabel("Error absoluto")
+    plt.yscale("log")
+    plt.savefig(f"{file_name}_graph_error.png", bbox_inches = "tight")
+
+#-------------------------------------------------Functions for writing in the PDF doc
 def write_math (doc, text):
     with doc.create(Alignat(numbering = False, escape = False)) as agn: 
         agn.append(text)
@@ -100,12 +165,15 @@ def create_doc(doc, file_name):
 def open_doc(file_name):
     doc_path = f"{file_name}.pdf"
     webbrowser.open("file://" + os.path.realpath(doc_path)) 
+
 #-------------------------------------------------Function for generating a .pdf document
 def pdfGenerate (f_sym, a, b, c, TOL, file_name, k = NONE, df = pd.DataFrame({}), n = NONE, d = NONE):
     geometry_options = {"tmargin": "1.5 in", "lmargin": "1.5in"}
     doc = Document(geometry_options=geometry_options)
-    k_error = k
-    # Validations
+    image_filename = f"{file_name}_graph.png"
+    image_filename_1 = f"{file_name}_graph_error.png"
+
+    # Local variables and validations
     x = Symbol('x')
     f = lambdify(x, f_sym)
     c = 0.5 *(a + b)
@@ -113,6 +181,7 @@ def pdfGenerate (f_sym, a, b, c, TOL, file_name, k = NONE, df = pd.DataFrame({})
     s = math.sqrt(f(c)**2-f(a)*f(b))
     str_s = "sqrt(f(c)^2-f(a)*f(b))"
     s_sym = sympify(str_s)
+    flag = true 
     
     # Generating a title
     doc.preamble.append(Command("title", "Método de Ridder"))
@@ -134,11 +203,13 @@ def pdfGenerate (f_sym, a, b, c, TOL, file_name, k = NONE, df = pd.DataFrame({})
         write_math(doc, f"s = {s}")
         if f(a) * f(b) > 0:
             doc.append("No existe una raíz dentro del intérvalo\n")
+            flag = false
         if s == 0:
             doc.append("Se realiza una división entre cero dentro del método, por lo tanto la función no se puede evaluar:\n")
-    
+            flag = false
+
     # Third section
-    if not df.empty:
+    if not df.empty and flag:
         with doc.create(Section("Ejecución del método")):
             # First subsection
             with doc.create(Subsection("Resultados numéricos:")):
@@ -148,54 +219,62 @@ def pdfGenerate (f_sym, a, b, c, TOL, file_name, k = NONE, df = pd.DataFrame({})
                 doc.append("Número de iteraciones: \n")
                 write_math(doc, f"n = {n}")
             # Second subsection
-            with doc.create(Subsection("Visualización de iteraciones:")):
+            with doc.create(Subsection("Visualización de iteraciones y gráficas:")):
                 # Table
-                with doc.create(Tabular("c|c")) as table:
-                    range1 = {1, 2}
-                    range2 = {3, 4}
-                    range3 = {5, 6}
-                    range4 = {7, 8}
-                    range5 = {9, 10}
-                    table.add_hline()
-                    table.add_row(df.columns[1], df.columns[2])
-                    for r in range(n):
-                        row = []
-                        for c in range1:
-                            row.append(df.loc[r][c])
-                        table.add_row(row)
-                    table.add_hline()
-                    table.add_row(df.columns[3], df.columns[4])
-                    table.add_hline()
-                    for r in range(n):
-                        row = []
-                        for c in range2:
-                            row.append(df.loc[r][c])
-                        table.add_row(row)
-                    table.add_hline()
-                    table.add_row(df.columns[5], df.columns[6])
-                    table.add_hline()
-                    for r in range(n):
-                        row = []
-                        for c in range3:
-                            row.append(df.loc[r][c])
-                        table.add_row(row)
-                    table.add_hline()
-                    table.add_row(df.columns[7], df.columns[8])
-                    table.add_hline()
-                    for r in range(n):
-                        row = []
-                        for c in range4:
-                            row.append(df.loc[r][c])
-                        table.add_row(row)
-                    table.add_hline()
-                    table.add_row(df.columns[9], df.columns[10])
-                    table.add_hline()
-                    for r in range(n):
-                        row = []
-                        for c in range4:
-                            row.append(df.loc[r][c])
-                        table.add_row(row)
-                    table.add_hline()
+                with doc.create(Subsection("Iteraciones")):
+                    with doc.create(Tabular("c|c")) as table:
+                        range1 = {1, 2}
+                        range2 = {3, 4}
+                        range3 = {5, 6}
+                        range4 = {7, 8}
+                        range5 = {9, 10}
+                        table.add_hline()
+                        table.add_row(df.columns[1], df.columns[2])
+                        for r in range(n):
+                            row = []
+                            for c in range1:
+                                row.append(df.loc[r][c])
+                            table.add_row(row)
+                        table.add_hline()
+                        table.add_row(df.columns[3], df.columns[4])
+                        table.add_hline()
+                        for r in range(n):
+                            row = []
+                            for c in range2:
+                                row.append(df.loc[r][c])
+                            table.add_row(row)
+                        table.add_hline()
+                        table.add_row(df.columns[5], df.columns[6])
+                        table.add_hline()
+                        for r in range(n):
+                            row = []
+                            for c in range3:
+                                row.append(df.loc[r][c])
+                            table.add_row(row)
+                        table.add_hline()
+                        table.add_row(df.columns[7], df.columns[8])
+                        table.add_hline()
+                        for r in range(n):
+                            row = []
+                            for c in range4:
+                                row.append(df.loc[r][c])
+                            table.add_row(row)
+                        table.add_hline()
+                        table.add_row(df.columns[9], df.columns[10])
+                        table.add_hline()
+                        for r in range(n):
+                            row = []
+                            for c in range5:
+                                row.append(df.loc[r][c])
+                            table.add_row(row)
+                        table.add_hline()
+                # Graph
+                with doc.create(Subsection("Gráfica de f(x) y g(x) en la primera iteración")):
+                    with doc.create(Figure(position="h")) as graph:
+                        graph.add_image(image_filename, width = "250px")
+                with doc.create(Subsection("Gráfica del error")):
+                    with doc.create(Figure(position="h")) as graph:
+                        graph.add_image(image_filename_1, width = "250px")
 
     # Fourth section
     with doc.create(Section("Conclusiones")):
@@ -208,3 +287,4 @@ def pdfGenerate (f_sym, a, b, c, TOL, file_name, k = NONE, df = pd.DataFrame({})
     # Generating .pdf and .tex documents 
     create_doc(doc, file_name)
     open_doc(file_name)
+    pdf_created = true
