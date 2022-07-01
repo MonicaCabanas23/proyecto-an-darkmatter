@@ -109,23 +109,37 @@ def asymptotic_error (table):
     return avg
 
 #----------------------------------------------------------------------- Function for graphing
-def graph (f_sym, a, b, c, d, g_sym, file_name):
+def graphRidder (f_sym, a, b, c, d, g_sym, file_name):
     x = Symbol('x')
     f = lambdify(x, f_sym)
     g = lambdify(x, g_sym)
     x = np.linspace(a, b, 100)
     d = c-(c-a)*f(c)/math.sqrt(f(c)**2-f(a)*f(b)) # first iteration
+    f_table = {"x":[], "f(x)":[]}
+    g_table = {"x":[], "g(x)":[]}
+    for i in x:
+        y_f = f(i)
+        y_g = g(i)
+        f_table["x"].append(x)
+        f_table["f(x)"].append(y_f)
+        g_table["x"].append(x)
+        g_table["g(x)"].append(y_g)
+    f_df = pd.DataFrame(f_table)
+    g_df = pd.DataFrame(g_table)
+    #print(f_table)
 
     plt.plot(x, [f(i) for i in x], label = 'f(x)', color = 'y')
+    #f_df.plot(color = 'y')
     plt.plot([a, b, c, d],[f(a), f(b), f(c), f(d)], 'o', color = 'y')
     plt.plot(x, [g(i) for i in x], label = 'g(x)', color = 'b')
+    #g_df.plot(color = 'b')
     plt.plot([a, b, c, d], [g(a), g(b), g(c), g(d)], 'o', color = 'b')
     plt.legend(loc = 'upper left')
     plt.xticks([a, b, c, d], ['a', 'b', 'c', 'd'])
     plt.xlabel('x')
     plt.ylabel('y')
     plt.grid()
-    plt.savefig(f"{file_name}_graph.png", bbox_inches = "tight")
+    plt.savefig(f"{file_name}_graph_Ridder.png", bbox_inches = "tight")
 
 #---------------------------------------------------------------------- Graphing error
 def graph_error(table, l, file_name):
@@ -151,7 +165,7 @@ def graph_error(table, l, file_name):
     plt.xlabel("Iteraciones")
     plt.ylabel("Error absoluto")
     plt.yscale("log")
-    plt.savefig(f"{file_name}_graph_error.png", bbox_inches = "tight")
+    plt.savefig(f"{file_name}_graph_error_Ridder.png", bbox_inches = "tight")
 
 #-------------------------------------------------Functions for writing in the PDF doc
 def write_math (doc, text):
@@ -170,8 +184,8 @@ def open_doc(file_name):
 def pdfGenerate (f_sym, a, b, c, TOL, file_name, k = NONE, df = pd.DataFrame({}), n = NONE, d = NONE):
     geometry_options = {"tmargin": "1.5 in", "lmargin": "1.5in"}
     doc = Document(geometry_options=geometry_options)
-    image_filename = f"{file_name}_graph.png"
-    image_filename_1 = f"{file_name}_graph_error.png"
+    image_filename = f"{file_name}_graph_Ridder.png"
+    image_filename_1 = f"{file_name}_graph_error_Ridder.png"
 
     # Local variables and validations
     x = Symbol('x')

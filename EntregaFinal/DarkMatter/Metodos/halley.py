@@ -12,7 +12,7 @@ from numpy import *
 from math import exp, sqrt, sin, cos, pi
 from sympy import *
 from tabulate import tabulate
-from pylatex import Document, Section, Subsection,Subsubsection, Tabular, Math, TikZ, Plot, Figure, Alignat,Command
+from pylatex import Document, Section, Subsection, Subsubsection, Tabular, Figure, Alignat,Command
 from pylatex.utils import italic
 import webbrowser
 from pylatex.utils import NoEscape
@@ -114,7 +114,7 @@ def open_doc(file_name):
     webbrowser.open("file://" + os.path.realpath(doc_path)) 
 
 def write_pdf(f, f_sym, df, df_sym, d2f, d2f_sym, p0, iter, tol, file_name):
-    geometry_options = {"tmargin": "1.5in", "lmargin": "1.5in"}
+    geometry_options = {"tmargin": "1.5 in", "lmargin": "1.5in"}
     doc = Document(geometry_options=geometry_options)
     image_filename = f"{file_name}_graph.png"
     p, table, n = halley(f, df, d2f, p0, iter, tol)
@@ -132,13 +132,13 @@ def write_pdf(f, f_sym, df, df_sym, d2f, d2f_sym, p0, iter, tol, file_name):
             write_math(doc, f"\epsilon  = {sp.latex(tol)}")
             
             
-            with doc.create(Subsection("Validaciones")):
-              with doc.create(Subsubsection("Evaluando la función en los intervalos")):
-                 write(doc, f"Evaluando en funcion f(x) los intervalos [{p0}, {iter}]: \n")
-                 write(doc, "\nEvaluando el punto inicial en la función\n")
-                 write_math(doc, f"f(p0) = {f(p0)}")
-                 write(doc, "\nEvaluando la iteración o punto final en función\n")
-                 write_math(doc,f"f(iter) = {f(iter)}")
+        with doc.create(Subsection("Validaciones")):
+            with doc.create(Subsubsection("Evaluando la función en los intervalos")):
+                write(doc, f"Evaluando en funcion f(x) los intervalos [{p0}, {iter}]: \n")
+                write(doc, "\nEvaluando el punto inicial en la función\n")
+                write_math(doc, f"f(p0) = {f(p0)}")
+                write(doc, "\nEvaluando la iteración o punto final en función\n")
+                write_math(doc,f"f(iter) = {f(iter)}")
 
             with doc.create(Subsubsection("Evaluando si existe la derivada")): 
                 write(doc, "verificando derivada\n")
@@ -167,29 +167,28 @@ def write_pdf(f, f_sym, df, df_sym, d2f, d2f_sym, p0, iter, tol, file_name):
                 write(doc, "\nRapidez de convergencia:")
                 write_math(doc, f"O({round(k,2)}^n)")
 
-            with doc.create(Subsection("Iteraciones")):
-                with doc.create(Subsubsection("Resultado de raíz aproximada del problema")):
-                    write(doc, "Valor de raíz aproximada:")
-                    write_math(doc, sp.latex(p))
-                    write(doc, "Resultado:")
-                    df = pd.DataFrame(table)
-                    with doc.create(Subsection("Iteraciones")):
-                        with doc.create(Tabular("c|c|c|c|c")) as table:
-                            range1 = {0, 1, 2, 3, 4}
-                            table.add_hline()
-                            table.add_row(df.columns)
-                            for r in range(n):
-                                row = []
-                                for c in range1:
-                                    row.append(df.loc[r][c])
-                                table.add_row(row)
-                            table.add_hline()
+        with doc.create(Subsection("Iteraciones")):
+            with doc.create(Subsubsection("Resultado de raíz aproximada del problema")):
+                write(doc, "Valor de raíz aproximada:")
+                write_math(doc, sp.latex(p))
+                write(doc, "Resultado:")
+                df = pd.DataFrame(table)
+                with doc.create(Tabular("c|c|c|c|c")) as table:
+                    range1 = {0, 1, 2, 3, 4}
+                    table.add_hline()
+                    table.add_row(df.columns)
+                    for r in range(n):
+                        row = []
+                        for c in range1:
+                            row.append(df.loc[r][c])
+                        table.add_row(row)
+                    table.add_hline()
 
-            with doc.create(Subsection("Visualización de grafica")):
-                        write_math(doc, f"\nGrafica para la función")
-                        write_math(doc, f"f(x) = {sp.latex(f_sym)}")
-                        with doc.create(Figure(position="h")) as graph:
-                            graph.add_image(image_filename, width = "250px")                 
+        with doc.create(Subsection("Visualización de grafica")):
+                    write_math(doc, f"\nGrafica para la función")
+                    write_math(doc, f"f(x) = {sp.latex(f_sym)}")
+                    with doc.create(Figure(position="h")) as graph:
+                        graph.add_image(image_filename, width = "250px")                 
     create_doc(doc, file_name)
     open_doc(file_name)
    

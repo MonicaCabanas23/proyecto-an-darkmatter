@@ -108,7 +108,7 @@ if __name__ == '__main__':
                     k = asymptotic_error(table)
                     g_sym = get_g_function(f_sym, a, b, c)
                     # Graphics
-                    graph(f_sym, a, b, c, d, g_sym, file_name)
+                    graphRidder(f_sym, a, b, c, d, g_sym, file_name)
                     graph_error(table, k, file_name)
                     # Create pdf
                     pdfGenerate (f_sym, a, b, c, tol, file_name, k, df, n, d)
