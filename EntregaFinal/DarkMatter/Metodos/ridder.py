@@ -21,6 +21,15 @@ def ridder (f_sym, a, b, TOL):
     # Declaring variables to use
     x = Symbol('x')
     f = lambdify(x, f_sym)
+        # Validating data
+    try: 
+        f(a)
+    except ZeroDivisionError as error:
+        messagebox.showerror(title='Error', message=str(error))
+    try:
+        f(b)
+    except ZeroDivisionError as error:
+        messagebox.showerror(title='Error', message=str(error))
     table = {"n":[],
         "a":[],
         "b":[],
@@ -33,16 +42,16 @@ def ridder (f_sym, a, b, TOL):
         "f(d)":[],
         "ERROR":[]}
     c = 0.5 * (a + b)
+    d = c
     oldRoot = c
     n = 1
+    if f(a) * f(b) > 0:
+        return d, n, table
     
     while True:
         # Executing iteration of the method
         c = 0.5 * (a + b)
-        try:
-            s = math.sqrt(f(c)**2-f(a)*f(b))
-        except ValueError as error : 
-            messagebox.showerror(title='Error', message=str(error))
+        s = math.sqrt(f(c)**2-f(a)*f(b))
         if s == 0:
             d = c
             break
@@ -113,7 +122,7 @@ def asymptotic_error (table):
     return avg
 
 #----------------------------------------------------------------------- Function for graphing
-def graphRidder (f_sym, a, b, c, d, g_sym, file_name):
+def graphRidder (f_sym, a, b, c, file_name, d, g_sym):
     x = Symbol('x')
     f = lambdify(x, f_sym)
     g = lambdify(x, g_sym)
@@ -135,7 +144,7 @@ def graphRidder (f_sym, a, b, c, d, g_sym, file_name):
     plt.savefig(f"{file_name}_graph_Ridder.png", bbox_inches = "tight")
 
 #---------------------------------------------------------------------- Graphing error
-def graph_error(table, l, file_name):
+def graph_error(table, file_name, l = NONE):
     # Taking ridder as a quadratic order of convergence algorithm
     e = lambda n: l**(2**n-1)*(table["ERROR"][0])**2**n
 
@@ -210,10 +219,10 @@ def pdfGenerate (f_sym, a, b, c, TOL, file_name, k = NONE, df = pd.DataFrame({})
         write_math(doc, f"s = {s}")
         if f(a) * f(b) > 0:
             doc.append("No existe una raíz dentro del intérvalo\n")
-            flag = false
+            flag = true
         if s == 0:
             doc.append("Se realiza una división entre cero dentro del método, por lo tanto la función no se puede evaluar:\n")
-            flag = false
+            flag = true
 
     # Third section
     if not df.empty and flag:
@@ -285,11 +294,15 @@ def pdfGenerate (f_sym, a, b, c, TOL, file_name, k = NONE, df = pd.DataFrame({})
 
     # Fourth section
     with doc.create(Section("Conclusiones")):
-       doc.append("El método converge a 'd' en 'n' iteraciones\n")
-       write_math(doc, f"d = {d}")
-       write_math(doc, f"n = {n}")
-       doc.append("La constante asintótica teórica del error del método es: ")
-       write_math(doc, f"k = {k}")
+        if n > 1:
+            doc.append("El método converge a 'd' en 'n' iteraciones\n")
+            write_math(doc, f"d = {d}")
+            write_math(doc, f"n = {n}")
+            doc.append("La constante asintótica teórica del error del método es: ")
+            write_math(doc, f"k = {k}")
+        else:
+            doc.append("No existe raíz dentro del intérvalo especificado\n")
+
     
     # Generating .pdf and .tex documents 
     create_doc(doc, file_name)
