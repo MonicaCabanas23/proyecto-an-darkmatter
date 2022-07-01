@@ -9,6 +9,7 @@ from numpy import size
 from sympy import root, sympify
 
 
+
 # Importar métodos numéricos desarrollados
 from Metodos.ridder import *
 from Metodos.halley import *

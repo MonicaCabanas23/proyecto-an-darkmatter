@@ -13,12 +13,13 @@ from math import exp, sqrt, sin, cos, pi
 from sympy import *
 from tabulate import tabulate
 from pylatex import Document, Section, Subsection, Subsubsection, Tabular, Figure, Alignat,Command
-from pylatex.utils import italic
+from pylatex.utils import italic,  NoEscape
 import webbrowser
-from pylatex.utils import NoEscape
+
 
 listahalley=[]
 lista=[]
+
 
 
 
@@ -82,7 +83,7 @@ def halley(f, df, d2f, p0, iter, tol):                         #definiendo la fu
         if error<tol:                          #parar hasta que error sea menor que la tolerancia
             break  
     return p, table, n
-#----------------------Grafica----------------------------------------->
+#--------------------------------------------Grafica------------------------------------------------------>
 def graph(file_name, f):
     x = arange(0.1, 20, 0.1)
 
@@ -173,18 +174,19 @@ def write_pdf(f, f_sym, df, df_sym, d2f, d2f_sym, p0, iter, tol, file_name):
             with doc.create(Subsubsection("Resultado de raíz aproximada del problema")):
                 write(doc, "Valor de raíz aproximada:")
                 write_math(doc, sp.latex(p))
-                write(doc, "Resultado:")
-                df = pd.DataFrame(table)
-                with doc.create(Tabular("c|c|c|c|c")) as table:
-                    range1 = {0, 1, 2, 3, 4}
-                    table.add_hline()
-                    table.add_row(df.columns)
-                    for r in range(n):
-                        row = []
-                        for c in range1:
-                            row.append(df.loc[r][c])
-                        table.add_row(row)
-                    table.add_hline()
+                with doc.create(Subsubsection("Resultado de iteraciones de la función")):
+                
+                    df = pd.DataFrame(table)
+                    with doc.create(Tabular("c|c|c|c|c")) as table:
+                        range1 = {0, 1, 2, 3, 4}
+                        table.add_hline()
+                        table.add_row(df.columns)
+                        for r in range(n):
+                            row = []
+                            for c in range1:
+                                row.append(df.loc[r][c])
+                            table.add_row(row)
+                        table.add_hline()
 
         with doc.create(Subsection("Visualización de grafica")):
                     write_math(doc, f"\nGrafica para la función")
