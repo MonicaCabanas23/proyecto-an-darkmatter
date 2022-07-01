@@ -13,13 +13,13 @@ from math import exp, sqrt, sin, cos, pi
 from sympy import *
 from tabulate import tabulate
 from pylatex import Document, Section, Subsection, Subsubsection, Tabular, Figure, Alignat,Command
-from pylatex.utils import italic
+from pylatex.utils import italic,  NoEscape
 import webbrowser
-from pylatex.utils import NoEscape
+
 
 listahalley=[]
 lista=[]
-pd.set_option("display_precision",10)
+
 
 
 
