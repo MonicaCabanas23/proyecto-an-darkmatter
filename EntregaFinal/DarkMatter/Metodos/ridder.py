@@ -1,5 +1,6 @@
 from lib2to3.pygram import Symbols
 import math
+from tkinter import messagebox
 from pickle import NONE
 from turtle import width
 from matplotlib.font_manager import get_fontext_synonyms
@@ -38,7 +39,10 @@ def ridder (f_sym, a, b, TOL):
     while True:
         # Executing iteration of the method
         c = 0.5 * (a + b)
-        s = math.sqrt(f(c)**2-f(a)*f(b))
+        try:
+            s = math.sqrt(f(c)**2-f(a)*f(b))
+        except ValueError as error : 
+            messagebox.showerror(title='Error', message=str(error))
         if s == 0:
             d = c
             break
@@ -115,19 +119,8 @@ def graphRidder (f_sym, a, b, c, d, g_sym, file_name):
     g = lambdify(x, g_sym)
     x = np.linspace(a, b, 100)
     d = c-(c-a)*f(c)/math.sqrt(f(c)**2-f(a)*f(b)) # first iteration
-    f_table = {"x":[], "f(x)":[]}
-    g_table = {"x":[], "g(x)":[]}
-    for i in x:
-        y_f = f(i)
-        y_g = g(i)
-        f_table["x"].append(x)
-        f_table["f(x)"].append(y_f)
-        g_table["x"].append(x)
-        g_table["g(x)"].append(y_g)
-    f_df = pd.DataFrame(f_table)
-    g_df = pd.DataFrame(g_table)
-    #print(f_table)
 
+    f1 = plt.figure()
     plt.plot(x, [f(i) for i in x], label = 'f(x)', color = 'y')
     #f_df.plot(color = 'y')
     plt.plot([a, b, c, d],[f(a), f(b), f(c), f(d)], 'o', color = 'y')
@@ -152,7 +145,7 @@ def graph_error(table, l, file_name):
             return l**((2**(n/2)-1)*(math.sqrt(2)+1))*(table["ERROR"][0])**(2**(n/4))
         else:
             return l**(2**((n+3)/2)-math.sqrt(2)-1)*(table["ERROR"][0])**(2**((n+3)/4))
-    
+    f2 = plt.figure()
     plt.plot(table["n"], [e(i) for i in table["n"]], label="Estimación con orden de convergencia cuadrática", color="green")
     plt.plot(table["n"], [e(i) for i in table["n"]], 'o', color="green")
     plt.plot(table["n"], [error(i) for i in table["n"]], label="Estimación con orden de convergencia sqrt(2)", color="red")
