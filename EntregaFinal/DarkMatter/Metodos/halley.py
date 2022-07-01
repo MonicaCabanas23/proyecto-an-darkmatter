@@ -1,5 +1,6 @@
 #importando todas las funciones
 import os as os
+from IPython.display import display
 import matplotlib.pyplot as plt 
 import sympy as sp
 import numpy as np
@@ -17,6 +18,12 @@ from pylatex.utils import NoEscape
 
 listahalley=[]
 lista=[]
+table = {"n":[],
+        "pn":[],
+        "f(pn)":[],
+        "f'(pn)":[],
+        "error":[]}
+
 
 #----------------------------------Manejo de archivo-------------------------------------------------->
 def remove_file(file_name):
@@ -44,35 +51,36 @@ def validate_f_funtion(df, p0, iter, tol):
 
 #--------------------------------Algoritmo de halley------------------------------------------------->
 
-def halley(f, df, d2f, p0, iter, tol):   #definiendo la función halley
+#algoritmo de halley
+def halley(f, df, d2f, p0, iter, tol):                         #definiendo la función halley
     p=p0                                 #sobredefiniendo p0
-    lista=[]
+    lista=[]                             #definiendo lista simple
     pp="-"                              
     error="-"
     for i in [*range(0, int(float(iter)))]:   #ciclo for para tomar encuenta el intervalo [0,pi]
         lista.append([i,p,f(p),df(p),error]) 
         listahalley.append(p)
         pp=p
-        p=p-2*f(p)*df(p)/2*df(p)**2-f(p)*d2f(p) #formula de halley
+        p=p-2*f(p)*df(p)/2*df(p)**2-f(p)*d2f(p) #formula de halley 
+        
+        table["n"].append(i)
+        table["pn"].append(p)
+        table["f(pn)"].append(f(p))
+        table["f'(pn)"].append(df(p))
+        table["error"].append(error)
+        
         errorA=abs(p-pp)                        #encontrar el error de halley
-        if p!=0:                                #iteraciones hasta encontrar 0
+        if p!=0:
             errorB=abs(p-pp)/p
         errorC=abs(f(p))
         error=errorA
         if error<tol:                          #parar hasta que error sea menor que la tolerancia
-            break                                 
-    print(tabulate(lista,headers=["n","pn","f(pn)","f'(pn)","error"],tablefmt='fancy_grid')) #imprimiendo resultados en tabulaciones
+            break 
+    print(tabulate(lista,headers=["n","pn","f(pn)","f'(pn)","error"],tablefmt='fancy_grid')) #imprimiendo resultados en tabulaciones  
     return p
-
 #----------------------Grafica----------------------------------------->
-#from pylab import *  da problemas con el boton de ventana 1
 
-# importar el módulo pyplot
 
-import matplotlib.pyplot as plt
-
-from math import *
-from numpy import *
 
 #------------------------------------------documento-------------------------------------------------->
 def write_math(doc, text):
@@ -134,23 +142,24 @@ def write_pdf(f, f_sym, df, df_sym, d2f, d2f_sym, p0, iter, tol, file_name):
                 write(doc, "\nRapidez de convergencia:")
                 write_math(doc, f"O({round(k,2)}^n)")
 
-            with doc.create(Subsubsection("Resultado de raíz aproximada del problema")):
+            with doc.create(Subsection("Iteraciones")):
+               
+
+                with doc.create(Subsubsection("Resultado de raíz aproximada del problema")):
                         
-                write(doc, "Valor de raíz aproximada:")
-                write_math(doc, sp.latex(halley(f, df, d2f, p0, iter, tol)))
+                 write(doc, "Valor de raíz aproximada:")
+                 write_math(doc, sp.latex(halley(f, df, d2f, p0, iter, tol)))
+                 write(doc, "Resultado:")
+                 df = pd.DataFrame(table)
+                 display(df)
+                 write_math(doc, sp.latex(df))
+
+                        
                 
                         
     create_doc(doc, file_name)
     open_doc(file_name)
-
-    if abs(df(p0)) < 1 and abs(df(iter)) < 1:
-          return False, 0
-    
-    k = max(abs(p0), abs(iter))
-
-    max_dist = max(abs(p0 -p0), abs(iter - p0))
-    n_est = ceil(log(tol/max_dist)/log(k))
-
+   
 
 #------------------------------------funcion al apretar el botón--------------------------------------->
 def solve( p0, iter, f_str, tol, file_name):
@@ -175,4 +184,8 @@ def create_doc(doc, file_name):
 def open_doc(file_name):
     doc_path = f"{file_name}.pdf"
     webbrowser.open("file://" + os.path.realpath(doc_path)) 
+
+#-------------------------------------    
+
+
 

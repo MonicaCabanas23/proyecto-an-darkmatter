@@ -46,6 +46,7 @@ if __name__ == '__main__':
         button3.place(x=340, y = 350)
 
     #----Boton ventana 1---------------------------------------------------------------
+    
     button1 = Button(root, text="Mostrar Métodos Empleados", width=30, height=3, command=v2)
     button1.pack()
     button1.place(x=290, y = 470)
