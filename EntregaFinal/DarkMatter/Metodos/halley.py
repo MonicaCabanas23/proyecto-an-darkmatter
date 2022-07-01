@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import sympy as sp
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from math import ceil, log
 from math import *
 from numpy import *
@@ -18,11 +19,6 @@ from pylatex.utils import NoEscape
 
 listahalley=[]
 lista=[]
-table = {"n":[],
-        "pn":[],
-        "f(pn)":[],
-        "f'(pn)":[],
-        "error":[]}
 
 
 
@@ -58,17 +54,25 @@ def halley(f, df, d2f, p0, iter, tol):                         #definiendo la fu
     lista=[]                             #definiendo lista simple
     pp="-"                              
     error="-"
+    table = {"n":[],
+        "pn":[],
+        "f(pn)":[],
+        "f'(pn)":[],
+        "error":[]}
+    n = 0
+
     for i in [*range(0, int(float(iter)))]:   #ciclo for para tomar encuenta el intervalo [0,pi]
         lista.append([i,p,f(p),df(p),error]) 
         listahalley.append(p)
-        pp=p
-        p=p-2*f(p)*df(p)/2*df(p)**2-f(p)*d2f(p) #formula de halley 
-        
         table["n"].append(i)
         table["pn"].append(p)
         table["f(pn)"].append(f(p))
         table["f'(pn)"].append(df(p))
         table["error"].append(error)
+        n +=1
+
+        pp=p
+        p=p-2*f(p)*df(p)/2*df(p)**2-f(p)*d2f(p) #formula de halley 
         
         errorA=abs(p-pp)                        #encontrar el error de halley
         if p!=0:
@@ -76,26 +80,20 @@ def halley(f, df, d2f, p0, iter, tol):                         #definiendo la fu
         errorC=abs(f(p))
         error=errorA
         if error<tol:                          #parar hasta que error sea menor que la tolerancia
-            break 
-    print(tabulate(lista,headers=["n","pn","f(pn)","f'(pn)","error"],tablefmt='fancy_grid')) #imprimiendo resultados en tabulaciones  
-    return p
+            break  
+    return p, table, n
 #----------------------Grafica----------------------------------------->
-from matplotlib import pyplot
-x = arange(0.1, 20, 0.1)
-
-
-def graph(file_name,f):
-    pyplot.plot(x, [f(i) for i in x])
+def graph(file_name, f):
+    x = arange(0.1, 20, 0.1)
+    plt.plot(x, [f(i) for i in x])
     # Establecer el color de los ejes.
-    pyplot.axhline(0, color="black")
-    pyplot.axvline(0, color="black")
+    plt.axhline(0, color="black")
+    plt.axvline(0, color="black")
     # Limitar los valores de los ejes.
     
     # Guardar gráfico como imágen PNG.
-   
     plt.grid()
     # Mostrarlo.
-    pyplot.show()
     plt.savefig(f"{file_name}_graph.png", bbox_inches="tight" )
 
 
@@ -107,11 +105,19 @@ def write_math(doc, text):
 def write(doc, text):
     doc.append(text)
 
+def create_doc(doc, file_name):
+    doc.generate_pdf(file_name, clean_tex=False)
+    doc.generate_tex()
+
+def open_doc(file_name):
+    doc_path = f"{file_name}.pdf"
+    webbrowser.open("file://" + os.path.realpath(doc_path)) 
+
 def write_pdf(f, f_sym, df, df_sym, d2f, d2f_sym, p0, iter, tol, file_name):
     geometry_options = {"tmargin": "1.5in", "lmargin": "1.5in"}
     doc = Document(geometry_options=geometry_options)
     image_filename = f"{file_name}_graph.png"
-    
+    p, table, n = halley(f, df, d2f, p0, iter, tol)
 
     doc.preamble.append(Command("title", "Método de Halley"))
     doc.append(NoEscape(r'\maketitle'))
@@ -123,7 +129,7 @@ def write_pdf(f, f_sym, df, df_sym, d2f, d2f_sym, p0, iter, tol, file_name):
             write_math(doc, f"f''(x) = {sp.latex(d2f_sym)}")
             write_math(doc, f"p0 = {p0}")
             write_math(doc, f"iter = {iter}")
-            write_math(doc, f"\elipson  = {sp.latex(tol)}")
+            write_math(doc, f"\epsilon  = {sp.latex(tol)}")
             
             
             with doc.create(Subsection("Validaciones")):
@@ -142,15 +148,15 @@ def write_pdf(f, f_sym, df, df_sym, d2f, d2f_sym, p0, iter, tol, file_name):
                 write_math(doc, f"df(iter) = {df(iter)}")
                 
                 if abs(df(p0)) < 1 and abs(df(iter)) < 1:
-                    write(doc, "si cumple que tiene derivada, prosigamos al desarrollo del problema...")
+                    write(doc, "Si tiene derivada, procedemos al desarrollo del problema...")
                 else:
-                    write(doc, "no cumple que tiene derivada")
+                    write(doc, "No tiene derivada")
 
 
-            with doc.create(Subsubsection("verificanfo la cota k en el intervalo")):
+            with doc.create(Subsubsection("verificando la cota k en el intérvalo")):
                 
                 k = max(abs(p0), abs(iter))
-                write(doc, f"\nLa cota para K en el intervalo [{p0}, {iter}] es: {k}\n")
+                write(doc, f"\nLa cota para K en el intérvalo [{p0}, {iter}] es: {k}\n")
                 max_dist = max(abs(p0 -p0), abs(iter - p0))
                 n_est = ceil(log(tol/max_dist)/log(k))
 
@@ -164,23 +170,26 @@ def write_pdf(f, f_sym, df, df_sym, d2f, d2f_sym, p0, iter, tol, file_name):
             with doc.create(Subsection("Iteraciones")):
                 with doc.create(Subsubsection("Resultado de raíz aproximada del problema")):
                     write(doc, "Valor de raíz aproximada:")
-                    write_math(doc, sp.latex(halley(f, df, d2f, p0, iter, tol)))
+                    write_math(doc, sp.latex(p))
                     write(doc, "Resultado:")
                     df = pd.DataFrame(table)
-                    display(df)
-                    write_math(doc, sp.latex(df))
+                    with doc.create(Subsection("Iteraciones")):
+                        with doc.create(Tabular("c|c|c|c|c")) as table:
+                            range1 = {0, 1, 2, 3, 4}
+                            table.add_hline()
+                            table.add_row(df.columns)
+                            for r in range(n):
+                                row = []
+                                for c in range1:
+                                    row.append(df.loc[r][c])
+                                table.add_row(row)
+                            table.add_hline()
 
             with doc.create(Subsection("Visualización de grafica")):
                         write_math(doc, f"\nGrafica para la función")
                         write_math(doc, f"f(x) = {sp.latex(f_sym)}")
                         with doc.create(Figure(position="h")) as graph:
-                            graph.add_image(image_filename, width = "250px")
-            
-
-
-                        
-                
-                        
+                            graph.add_image(image_filename, width = "250px")                 
     create_doc(doc, file_name)
     open_doc(file_name)
    
@@ -197,19 +206,11 @@ def solve( p0, iter, f_str, tol, file_name):
         df = sp.lambdify(x, df_sym)   #funcion derivada 1
         d2f_sym = sp.diff(df_sym)  #derivada 2
         d2f = sp.lambdify(x, d2f_sym) #funcion derivada 2   
+        graph(file_name, f)
         write_pdf(f, f_sym, df, df_sym, d2f, d2f_sym, p0, iter, tol, file_name)
 
 #---------------------------------------configurando webbrowser---------------------------------------->
 
-def create_doc(doc, file_name):
-    doc.generate_pdf(file_name, clean_tex=False)
-    doc.generate_tex()
-
-def open_doc(file_name):
-    doc_path = f"{file_name}.pdf"
-    webbrowser.open("file://" + os.path.realpath(doc_path)) 
-
-#-------------------------------------    
 
 
 
