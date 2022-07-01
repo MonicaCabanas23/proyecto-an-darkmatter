@@ -25,6 +25,7 @@ table = {"n":[],
         "error":[]}
 
 
+
 #----------------------------------Manejo de archivo-------------------------------------------------->
 def remove_file(file_name):
     if os.path.exists(file_name):
@@ -79,7 +80,23 @@ def halley(f, df, d2f, p0, iter, tol):                         #definiendo la fu
     print(tabulate(lista,headers=["n","pn","f(pn)","f'(pn)","error"],tablefmt='fancy_grid')) #imprimiendo resultados en tabulaciones  
     return p
 #----------------------Grafica----------------------------------------->
+from matplotlib import pyplot
+x = arange(0.1, 20, 0.1)
 
+
+def graph(file_name,f):
+    pyplot.plot(x, [f(i) for i in x])
+    # Establecer el color de los ejes.
+    pyplot.axhline(0, color="black")
+    pyplot.axvline(0, color="black")
+    # Limitar los valores de los ejes.
+    
+    # Guardar gráfico como imágen PNG.
+   
+    plt.grid()
+    # Mostrarlo.
+    pyplot.show()
+    plt.savefig(f"{file_name}_graph.png", bbox_inches="tight" )
 
 
 #------------------------------------------documento-------------------------------------------------->
@@ -93,6 +110,8 @@ def write(doc, text):
 def write_pdf(f, f_sym, df, df_sym, d2f, d2f_sym, p0, iter, tol, file_name):
     geometry_options = {"tmargin": "1.5in", "lmargin": "1.5in"}
     doc = Document(geometry_options=geometry_options)
+    image_filename = f"{file_name}_graph.png"
+    
 
     doc.preamble.append(Command("title", "Método de Halley"))
     doc.append(NoEscape(r'\maketitle'))
@@ -143,16 +162,21 @@ def write_pdf(f, f_sym, df, df_sym, d2f, d2f_sym, p0, iter, tol, file_name):
                 write_math(doc, f"O({round(k,2)}^n)")
 
             with doc.create(Subsection("Iteraciones")):
-               
-
                 with doc.create(Subsubsection("Resultado de raíz aproximada del problema")):
-                        
-                 write(doc, "Valor de raíz aproximada:")
-                 write_math(doc, sp.latex(halley(f, df, d2f, p0, iter, tol)))
-                 write(doc, "Resultado:")
-                 df = pd.DataFrame(table)
-                 display(df)
-                 write_math(doc, sp.latex(df))
+                    write(doc, "Valor de raíz aproximada:")
+                    write_math(doc, sp.latex(halley(f, df, d2f, p0, iter, tol)))
+                    write(doc, "Resultado:")
+                    df = pd.DataFrame(table)
+                    display(df)
+                    write_math(doc, sp.latex(df))
+
+            with doc.create(Subsection("Visualización de grafica")):
+                        write_math(doc, f"\nGrafica para la función")
+                        write_math(doc, f"f(x) = {sp.latex(f_sym)}")
+                        with doc.create(Figure(position="h")) as graph:
+                            graph.add_image(image_filename, width = "250px")
+            
+
 
                         
                 
