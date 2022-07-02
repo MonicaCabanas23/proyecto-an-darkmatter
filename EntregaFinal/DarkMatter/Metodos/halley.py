@@ -88,6 +88,7 @@ def halley(f, df, d2f, p0, iter, tol):                         #definiendo la fu
     return p, table, n
 #--------------------------------------------Grafica------------------------------------------------------>
 def graph(file_name, f):
+    plt.clf()
     x = arange(0.1, 20, 0.1)
 
     f3 = plt.figure
