@@ -102,27 +102,33 @@ if __name__ == '__main__':
                 c = (a+b)*0.5
                 tol = sympify(txtTol.get())
                 file_name = txtFile_name.get()
-
-                # Get other values for generating pdf
                 try:
-                    # solve and get values
-                    d, n, table = ridder(f_sym, a, b, tol)
-                    df = pd.DataFrame(table)
-                    k = asymptotic_error(table)
-                    if n > 1:
-                        g_sym = get_g_function(f_sym, a, b, c)
-                        # Graphics
-                        graphRidder(f_sym, a, b, c, file_name, d, g_sym)
-                        graph_error(table, file_name, k)
-                    # Create pdf
-                    pdfGenerate (f_sym, a, b, c, tol, file_name, k, df, n, d)
+                    result_labeL2.config(text="Reporte Generado y guardado en la carpeta métodos", foreground="white",background="black", font = ("Century Gothic", 12))
+                    # Get other values for generating pdf
+                    try:
+                        # solve and get values
+                        d, n, table = ridder(f_sym, a, b, tol)
+                        df = pd.DataFrame(table)
+                        k = asymptotic_error(table)
+                        if n > 1:
+                            g_sym = get_g_function(f_sym, a, b, c)
+                            # Graphics
+                            graphRidder(f_sym, a, b, c, file_name, d, g_sym)
+                            graph_error(table, file_name, k)
+                        # Create pdf
+                        pdfGenerate (f_sym, a, b, c, tol, file_name, k, df, n, d)
+                    except ValueError as error : 
+                        messagebox.showerror(title='Error', message=str(error))
                 except ValueError as error : 
-                    messagebox.showerror(title='Error', message=str(error))
+                        messagebox.showerror(title='Error', message=str(error))        
             except ValueError as error : 
                     messagebox.showerror(title='Error', message=str(error))
             
         btnCalculate = Button(ridderWindow, text = "Calcular", width=17, height=3, font = ("Century Gothic", 9), command = btnCalculate_clicked, foreground="black", background="#ffde59")
         btnCalculate.place(x = 325, y = 400)
+        #result report 
+        result_labeL2 = Label(ridderWindow)
+        result_labeL2.place(x = 110, y = 450)
 
         #---------------------------------Funcion Ventana Halley----------------------------------------
     def v4():
@@ -183,12 +189,14 @@ if __name__ == '__main__':
                 file_name = filename_function.get()
 
                 try:
-                    
-                    solve(p0, iter, f_str, tol,file_name)
-                    result_label.config(text="Reporte Generado", foreground="white",background="black", font = ("Century Gothic", 15))
+                    result_label.config(text="Reporte Generado y guardado en la carpeta métodos", foreground="white",background="black", font = ("Century Gothic", 12))
+                    try:
+                        solve(p0, iter, f_str, tol,file_name)
+                        
+                    except ValueError as error:
+                        messagebox.showerror(title="Error", message=str(error))
                 except ValueError as error:
-                    messagebox.showerror(title="Error", message=str(error))
-                
+                        messagebox.showerror(title="Error", message=str(error))
             except ValueError as error:
                 messagebox.showerror(title="Error", message=str(error))
 
@@ -199,6 +207,6 @@ if __name__ == '__main__':
         
         #-----------------------------------------Resultado label halley--------------------------------------->
         result_label = Label(halleyWindow)
-        result_label.place(x = 400, y = 450)
+        result_label.place(x = 110, y = 450)
 
     root.mainloop()
