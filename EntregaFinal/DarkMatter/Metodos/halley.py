@@ -1,4 +1,5 @@
 #importando todas las funciones
+from fileinput import filename
 import os as os
 from IPython.display import display
 import matplotlib.pyplot as plt 
@@ -15,6 +16,8 @@ from tabulate import tabulate
 from pylatex import Document, Section, Subsection, Subsubsection, Tabular, Figure, Alignat,Command
 from pylatex.utils import italic,  NoEscape
 import webbrowser
+import os
+
 
 
 listahalley=[]
@@ -108,13 +111,7 @@ def write_math(doc, text):
 def write(doc, text):
     doc.append(text)
 
-def create_doc(doc, file_name):
-    doc.generate_pdf(file_name, clean_tex=False)
-    doc.generate_tex()
-
-def open_doc(file_name):
-    doc_path = f"{file_name}.pdf"
-    webbrowser.open("file://" + os.path.realpath(doc_path)) 
+ 
 
 def write_pdf(f, f_sym, df, df_sym, d2f, d2f_sym, p0, iter, tol, file_name):
     geometry_options = {"tmargin": "1.5 in", "lmargin": "1.5in"}
@@ -193,16 +190,13 @@ def write_pdf(f, f_sym, df, df_sym, d2f, d2f_sym, p0, iter, tol, file_name):
                     write_math(doc, f"f(x) = {sp.latex(f_sym)}")
                     with doc.create(Figure(position="h")) as graph:
                         graph.add_image(image_filename, width = "250px")                 
-    create_doc(doc, file_name)
-    open_doc(file_name)
+    doc.generate_pdf(file_name, clean_tex=False)
    
 
 #------------------------------------funcion al apretar el botón--------------------------------------->
 def solve( p0, iter, f_str, tol, file_name):
         global x
         x = sp.Symbol("x")
-
-
         f_sym = sp.sympify(f_str)  #funcion simbolica
         f = sp.lambdify(x, f_sym)  #funcion f(x)
         df_sym = sp.diff(f_sym)   #derivada 1
@@ -211,9 +205,7 @@ def solve( p0, iter, f_str, tol, file_name):
         d2f = sp.lambdify(x, d2f_sym) #funcion derivada 2   
         graph(file_name, f)
         write_pdf(f, f_sym, df, df_sym, d2f, d2f_sym, p0, iter, tol, file_name)
-
-#---------------------------------------configurando webbrowser---------------------------------------->
-
+        webbrowser.open(f"{file_name}.pdf")
 
 
 
