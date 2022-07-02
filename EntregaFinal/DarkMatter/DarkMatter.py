@@ -109,10 +109,11 @@ if __name__ == '__main__':
                     d, n, table = ridder(f_sym, a, b, tol)
                     df = pd.DataFrame(table)
                     k = asymptotic_error(table)
-                    g_sym = get_g_function(f_sym, a, b, c)
-                    # Graphics
-                    graphRidder(f_sym, a, b, c, d, g_sym, file_name)
-                    graph_error(table, k, file_name)
+                    if n > 1:
+                        g_sym = get_g_function(f_sym, a, b, c)
+                        # Graphics
+                        graphRidder(f_sym, a, b, c, file_name, d, g_sym)
+                        graph_error(table, file_name, k)
                     # Create pdf
                     pdfGenerate (f_sym, a, b, c, tol, file_name, k, df, n, d)
                     if pdf_created:

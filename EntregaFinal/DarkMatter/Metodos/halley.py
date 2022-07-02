@@ -90,7 +90,7 @@ def halley(f, df, d2f, p0, iter, tol):                         #definiendo la fu
 def graph(file_name, f):
     x = arange(0.1, 20, 0.1)
 
-    f3 = plt.figure()
+    f3 = plt.figure
     plt.plot(x, [f(i) for i in x])
     # Establecer el color de los ejes.
     plt.axhline(0, color="black")
