@@ -128,7 +128,7 @@ if __name__ == '__main__':
         btnCalculate.place(x = 325, y = 400)
         #result report 
         result_labeL2 = Label(ridderWindow)
-        result_labeL2.place(x = 110, y = 450)
+        result_labeL2.place(x = 200, y = 500)
 
         #---------------------------------Funcion Ventana Halley----------------------------------------
     def v4():
