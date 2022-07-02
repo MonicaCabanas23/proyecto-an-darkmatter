@@ -80,15 +80,15 @@ if __name__ == '__main__':
 
         # Text box
         txtFunction = Entry(ridderWindow, font = ("Century Gothic", 12))
-        txtFunction.place(x = 300, y = 150)
+        txtFunction.place(x = 350, y = 150)
         txtA = Entry(ridderWindow, font = ("Century Gothic", 12))
-        txtA.place(x = 300, y = 200)
+        txtA.place(x = 350, y = 200)
         txtB = Entry(ridderWindow, font = ("Century Gothic", 12))
-        txtB.place(x = 300, y = 250)
+        txtB.place(x = 350, y = 250)
         txtTol = Entry(ridderWindow, font = ("Century Gothic", 12))
-        txtTol.place(x = 300, y = 300)
+        txtTol.place(x = 350, y = 300)
         txtFile_name = Entry(ridderWindow, font = ("Century Gothic", 12))
-        txtFile_name.place(x = 300, y = 350)
+        txtFile_name.place(x = 350, y = 350)
 
         # Button
         def btnCalculate_clicked():
@@ -116,9 +116,6 @@ if __name__ == '__main__':
                         graph_error(table, file_name, k)
                     # Create pdf
                     pdfGenerate (f_sym, a, b, c, tol, file_name, k, df, n, d)
-                    if pdf_created:
-                        lblConfirmation = Label(ridderWindow, text = "Reporte generado ", font = ("Century Gothic", 12), foreground="white", background="black")
-                        lblConfirmation.place(x = 250, y = 450)
                 except ValueError as error : 
                     messagebox.showerror(title='Error', message=str(error))
             except ValueError as error : 
